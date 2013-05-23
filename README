@@ -1,0 +1,1 @@
+Fast int->int and int->long map data structures using the Google sparsehash implementation.  Allows large data structures of this type to be stored off-heap.
