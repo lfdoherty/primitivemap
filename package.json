@@ -1,6 +1,6 @@
 {
 	"name": "primitivemap",
-	"version": "0.0.2",
+	"version": "0.0.3",
 	"description": "Fast int->int and int->long map data structures using the Google sparsehash implementation.  Allows large data structures of this type to be stored off-heap.",
 	"main": "./primitivemap",
 	"author": "Liam Doherty",

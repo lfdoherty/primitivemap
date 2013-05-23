@@ -11,9 +11,9 @@ FakeIntIntMap.prototype.put = function(key, value){
 	this.data[key] = value
 }
 
-//var m = new FakeIntIntMap()
+var m = new FakeIntIntMap()
 
-var m = new primitivemap.IntIntMap()
+//var m = new primitivemap.IntIntMap()
 
 var v = m.get(10)
 
@@ -47,7 +47,7 @@ var k = {}
 
 setTimeout(function(){
 	
-	global.gc();
+	//global.gc();
 	console.log(require('util').inspect(process.memoryUsage()));
 
 	var start = Date.now()
