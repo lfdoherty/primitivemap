@@ -89,7 +89,13 @@
 #ifndef _DENSEHASHTABLE_H_
 #define _DENSEHASHTABLE_H_
 
+#ifndef WIN32
 #include "sparseconfig.h"
+#endif
+#ifdef WIN32
+#include "windows_sparseconfig.h"
+#endif
+
 #include <assert.h>
 #include <stdio.h>              // for FILE, fwrite, fread
 #include <algorithm>            // For swap(), eg
