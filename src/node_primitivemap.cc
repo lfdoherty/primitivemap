@@ -57,10 +57,7 @@ Handle<Value> VException(const char *msg) {
 
 class IntIntMap : node::ObjectWrap {
   private:
-  
-  
   public:
-
 	google::dense_hash_map<int32_t,int32_t> data;
 
     IntIntMap(){
@@ -113,10 +110,7 @@ class IntIntMap : node::ObjectWrap {
 
 class IntLongMap : node::ObjectWrap {
   private:
-  
-  
   public:
-
 	google::dense_hash_map<int32_t,int64_t> data;
 
     IntLongMap(){
@@ -166,6 +160,62 @@ class IntLongMap : node::ObjectWrap {
     }
 };
 
+
+class StringStringMap : node::ObjectWrap {
+  private:
+  public:
+	std::string empty_key;  
+	google::dense_hash_map<std::string,std::string> data;
+
+    StringStringMap(){
+    	empty_key = "";
+		data.set_empty_key(empty_key);
+    }
+    ~StringStringMap() {}
+    
+    static v8::Persistent<FunctionTemplate> constructor_template;
+
+    static Handle<Value> New(const Arguments& args) {
+		HandleScope scope;
+
+		StringStringMap* instance = new StringStringMap();
+
+		instance->Wrap(args.This());
+		return args.This();
+    }
+	static v8::Handle<Value> GetSize(v8::Local<v8::String> property, const v8::AccessorInfo& info) {
+		HandleScope scope;
+		StringStringMap* instance = node::ObjectWrap::Unwrap<StringStringMap>(info.Holder());
+		return scope.Close(Integer::New(instance->data.size()));
+	}
+
+    static v8::Handle<Value> get(const Arguments& args) {
+	    HandleScope scope;
+		StringStringMap* instance = node::ObjectWrap::Unwrap<StringStringMap>(args.This());
+
+    	std::string key = *v8::String::Utf8Value(args[0]->ToString());
+
+		google::dense_hash_map<std::string,std::string>::const_iterator it = instance->data.find(key);
+		if(it == instance->data.end()){
+			return scope.Close(Null());
+		}else{
+	    	return scope.Close(String::New(it->second.c_str(),it->second.size()));
+		}
+    }
+    static v8::Handle<Value> put(const Arguments& args) {
+	    HandleScope scope;
+		StringStringMap* instance = node::ObjectWrap::Unwrap<StringStringMap>(args.This());
+
+		
+    	std::string key = *v8::String::Utf8Value(args[0]->ToString());
+		std::string value = *v8::String::Utf8Value(args[1]->ToString());
+
+		instance->data[key] = value;
+		
+		return scope.Close(Null());
+    }
+};
+
 // @Node.js calls Init() when you load the extension through require()
 // Init() defines our constructor function and prototype methods
 // It then binds our constructor function as a property of the target object
@@ -188,19 +238,29 @@ static void Init(Handle<Object> target) {
 		IntLongMap::constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
 		IntLongMap::constructor_template->SetClassName(v8::String::NewSymbol("IntLongMap"));
 
+		v8::Local<FunctionTemplate> lftStringString = v8::FunctionTemplate::New(StringStringMap::New);
+		StringStringMap::constructor_template = v8::Persistent<FunctionTemplate>::New(lftStringString);
+		StringStringMap::constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
+		StringStringMap::constructor_template->SetClassName(v8::String::NewSymbol("StringStringMap"));
+
 		// Set property accessors
 		IntIntMap::constructor_template->InstanceTemplate()->SetAccessor(String::New("size"), IntIntMap::GetSize);
 		IntLongMap::constructor_template->InstanceTemplate()->SetAccessor(String::New("size"), IntLongMap::GetSize);
+		StringStringMap::constructor_template->InstanceTemplate()->SetAccessor(String::New("size"), StringStringMap::GetSize);
 
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "get", IntIntMap::get);
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "put", IntIntMap::put);
 
 		NODE_SET_PROTOTYPE_METHOD(IntLongMap::constructor_template, "get", IntLongMap::get);
 		NODE_SET_PROTOTYPE_METHOD(IntLongMap::constructor_template, "put", IntLongMap::put);
+
+		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "get", StringStringMap::get);
+		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "put", StringStringMap::put);
 	}
 
 	target->Set(String::NewSymbol("IntIntMap"), IntIntMap::constructor_template->GetFunction());
 	target->Set(String::NewSymbol("IntLongMap"), IntLongMap::constructor_template->GetFunction());
+	target->Set(String::NewSymbol("StringStringMap"), StringStringMap::constructor_template->GetFunction());
 }
 
 // What follows is boilerplate code:
@@ -213,6 +273,7 @@ so we do the following: */
 
 v8::Persistent<FunctionTemplate> IntIntMap::constructor_template;
 v8::Persistent<FunctionTemplate> IntLongMap::constructor_template;
+v8::Persistent<FunctionTemplate> StringStringMap::constructor_template;
 
 extern "C"
 void init(Handle<Object> target) {
