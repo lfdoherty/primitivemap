@@ -6,7 +6,7 @@ Grow your node.js process to 3.3GB without special configuration or GC unhappine
 */
 
 
-var primitivemap = require('./primitivemap')
+var primitivemap = require('./../primitivemap')
 
 var m = new primitivemap.StringStringMap()
 

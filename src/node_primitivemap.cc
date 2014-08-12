@@ -105,6 +105,18 @@ class IntIntMap : node::ObjectWrap {
 		
 		return scope.Close(Null());
     }
+    static v8::Handle<Value> remove(const Arguments& args) {
+	    HandleScope scope;
+		IntIntMap* instance = node::ObjectWrap::Unwrap<IntIntMap>(args.This());
+
+    	int key = args[0]->Int32Value();
+
+		google::dense_hash_map<int32_t,int32_t>::iterator it = instance->data.find(key);
+		if(it != instance->data.end()){
+			instance->data.erase(it);
+		}
+		return scope.Close(Null());
+    }
 };
 
 
@@ -158,18 +170,33 @@ class IntLongMap : node::ObjectWrap {
 		
 		return scope.Close(Null());
     }
+    static v8::Handle<Value> remove(const Arguments& args) {
+	    HandleScope scope;
+		IntLongMap* instance = node::ObjectWrap::Unwrap<IntLongMap>(args.This());
+
+    	int key = args[0]->Int32Value();
+
+		google::dense_hash_map<int,int64_t>::iterator it = instance->data.find(key);
+		if(it != instance->data.end()){
+			instance->data.erase(it);
+		}
+		return scope.Close(Null());
+    }
 };
 
 
 class StringStringMap : node::ObjectWrap {
   private:
   public:
-	std::string empty_key;  
+	std::string empty_key;
+	std::string deleted_key;
 	google::dense_hash_map<std::string,std::string> data;
 
     StringStringMap(){
     	empty_key = "";
+    	deleted_key = "cbb47b9d-d565-455a-b60f-3dc97df836b4";
 		data.set_empty_key(empty_key);
+		data.set_deleted_key(deleted_key);
     }
     ~StringStringMap() {}
     
@@ -201,6 +228,18 @@ class StringStringMap : node::ObjectWrap {
 		}else{
 	    	return scope.Close(String::New(it->second.c_str(),it->second.size()));
 		}
+    }
+	static v8::Handle<Value> remove(const Arguments& args) {
+	    HandleScope scope;
+		StringStringMap* instance = node::ObjectWrap::Unwrap<StringStringMap>(args.This());
+
+    	std::string key = *v8::String::Utf8Value(args[0]->ToString());
+
+		google::dense_hash_map<std::string,std::string>::iterator it = instance->data.find(key);
+		if(it != instance->data.end()){
+			instance->data.erase(it);
+		}
+		return scope.Close(Null());
     }
     static v8::Handle<Value> put(const Arguments& args) {
 	    HandleScope scope;
@@ -250,12 +289,15 @@ static void Init(Handle<Object> target) {
 
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "get", IntIntMap::get);
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "put", IntIntMap::put);
+		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "rm", IntIntMap::remove);
 
 		NODE_SET_PROTOTYPE_METHOD(IntLongMap::constructor_template, "get", IntLongMap::get);
 		NODE_SET_PROTOTYPE_METHOD(IntLongMap::constructor_template, "put", IntLongMap::put);
+		NODE_SET_PROTOTYPE_METHOD(IntLongMap::constructor_template, "rm", IntLongMap::remove);
 
 		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "get", StringStringMap::get);
 		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "put", StringStringMap::put);
+		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "rm", StringStringMap::remove);
 	}
 
 	target->Set(String::NewSymbol("IntIntMap"), IntIntMap::constructor_template->GetFunction());

@@ -1,5 +1,5 @@
 
-var primitivemap = require('./primitivemap')
+var primitivemap = require('./../primitivemap')
 
 function FakeIntIntMap(){
 	this.data = {}

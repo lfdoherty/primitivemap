@@ -1,3 +1,10 @@
 int->int, int->long, and string->string map data structures using the Google sparsehash implementation.  Allows large data structures of this type to be stored off-heap.
 
 Note that this is slower than using native JS structures - for int->int, about 7 times slower for reads, and 1.2 times slower for writes.
+
+Usage:
+
+var map = new primitivemap.StringStringMap()
+map.put('some key', 'some value')
+console.log('value: ' + map.get('some key'))
+map.rm('some key')
