@@ -118,6 +118,13 @@ class IntIntMap : node::ObjectWrap {
 		}
 		return scope.Close(Null());
     }
+    static v8::Handle<Value> clear(const Arguments& args) {
+	    HandleScope scope;
+		IntIntMap* instance = node::ObjectWrap::Unwrap<IntIntMap>(args.This());
+
+		instance->data.clear();
+		return scope.Close(Null());
+    }
 };
 
 
@@ -182,6 +189,13 @@ class IntLongMap : node::ObjectWrap {
 		if(it != instance->data.end()){
 			instance->data.erase(it);
 		}
+		return scope.Close(Null());
+    }
+    static v8::Handle<Value> clear(const Arguments& args) {
+	    HandleScope scope;
+		IntLongMap* instance = node::ObjectWrap::Unwrap<IntLongMap>(args.This());
+
+		instance->data.clear();
 		return scope.Close(Null());
     }
 };
@@ -255,6 +269,13 @@ class StringStringMap : node::ObjectWrap {
 		
 		return scope.Close(Null());
     }
+    static v8::Handle<Value> clear(const Arguments& args) {
+	    HandleScope scope;
+		StringStringMap* instance = node::ObjectWrap::Unwrap<StringStringMap>(args.This());
+
+		instance->data.clear();
+		return scope.Close(Null());
+    }
 };
 
 // @Node.js calls Init() when you load the extension through require()
@@ -292,14 +313,17 @@ static void Init(Handle<Object> target) {
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "get", IntIntMap::get);
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "put", IntIntMap::put);
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "rm", IntIntMap::remove);
+		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "clear", IntIntMap::clear);
 
 		NODE_SET_PROTOTYPE_METHOD(IntLongMap::constructor_template, "get", IntLongMap::get);
 		NODE_SET_PROTOTYPE_METHOD(IntLongMap::constructor_template, "put", IntLongMap::put);
 		NODE_SET_PROTOTYPE_METHOD(IntLongMap::constructor_template, "rm", IntLongMap::remove);
+		NODE_SET_PROTOTYPE_METHOD(IntLongMap::constructor_template, "clear", IntLongMap::clear);
 
 		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "get", StringStringMap::get);
 		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "put", StringStringMap::put);
 		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "rm", StringStringMap::remove);
+		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "clear", StringStringMap::clear);
 	}
 
 	target->Set(String::NewSymbol("IntIntMap"), IntIntMap::constructor_template->GetFunction());
