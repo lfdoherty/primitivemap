@@ -62,6 +62,7 @@ class IntIntMap : node::ObjectWrap {
 
     IntIntMap(){
 	   data.set_empty_key(-214783648);
+	   data.set_deleted_key(-214783647);
     }
     ~IntIntMap() {}
     
@@ -127,6 +128,7 @@ class IntLongMap : node::ObjectWrap {
 
     IntLongMap(){
 	   data.set_empty_key(-214783648);
+	   data.set_deleted_key(-214783647);
     }
     ~IntLongMap() {}
     
