@@ -62,6 +62,7 @@ class IntIntMap : node::ObjectWrap {
 
     IntIntMap(){
 	   data.set_empty_key(-214783648);
+	   data.set_deleted_key(-214783647);
     }
     ~IntIntMap() {}
     
@@ -107,6 +108,13 @@ class IntIntMap : node::ObjectWrap {
 		}
 		return scope.Close(Null());
     }
+    static v8::Handle<Value> clear(const Arguments& args) {
+	    HandleScope scope;
+		IntIntMap* instance = node::ObjectWrap::Unwrap<IntIntMap>(args.This());
+
+		instance->data.clear();
+		return scope.Close(Null());
+    }
 };
 
 
@@ -117,6 +125,7 @@ class IntDoubleMap : node::ObjectWrap {
 
     IntDoubleMap(){
 	   data.set_empty_key(-214783648);
+	   data.set_deleted_key(-214783647);
     }
     ~IntDoubleMap() {}
     
@@ -146,7 +155,7 @@ class IntDoubleMap : node::ObjectWrap {
 		if(it == instance->data.end()){
 			return scope.Close(Null());
 		}else{
-	    	return scope.Close(Integer::New(it->second));
+	    	return scope.Close(Number::New(it->second));
 		}
     }
     static v8::Handle<Value> put(const Arguments& args) {
@@ -154,7 +163,7 @@ class IntDoubleMap : node::ObjectWrap {
 		IntDoubleMap* instance = node::ObjectWrap::Unwrap<IntDoubleMap>(args.This());
 
     	int key = args[0]->Int32Value();
-    	int64_t value = args[1]->IntegerValue();
+    	double value = args[1]->NumberValue();
 
 		instance->data[key] = value;
 		
@@ -170,6 +179,13 @@ class IntDoubleMap : node::ObjectWrap {
 		if(it != instance->data.end()){
 			instance->data.erase(it);
 		}
+		return scope.Close(Null());
+    }
+    static v8::Handle<Value> clear(const Arguments& args) {
+	    HandleScope scope;
+		IntLongMap* instance = node::ObjectWrap::Unwrap<IntLongMap>(args.This());
+
+		instance->data.clear();
 		return scope.Close(Null());
     }
 };
@@ -293,6 +309,13 @@ class StringIntMap : node::ObjectWrap {
 		instance->data[key] = value;
 		return scope.Close(Null());
     }
+    static v8::Handle<Value> clear(const Arguments& args) {
+	    HandleScope scope;
+		StringStringMap* instance = node::ObjectWrap::Unwrap<StringStringMap>(args.This());
+
+		instance->data.clear();
+		return scope.Close(Null());
+    }
 };
 
 class StringDoubleMap : node::ObjectWrap {
@@ -300,7 +323,7 @@ class StringDoubleMap : node::ObjectWrap {
   public:
 	std::string empty_key;
 	std::string deleted_key;
-	google::dense_hash_map<std::string,int64_t> data;
+	google::dense_hash_map<std::string,double> data;
 
     StringDoubleMap(){
     	empty_key = "";
@@ -332,7 +355,7 @@ class StringDoubleMap : node::ObjectWrap {
 		if(it == instance->data.end()){
 			return scope.Close(Null());
 		}else{
-	    	return scope.Close(String::New(it->second.c_str(),it->second.size()));
+	    	return scope.Close(Number::New(it->second));
 		}
     }
 	static v8::Handle<Value> remove(const Arguments& args) {
@@ -349,7 +372,7 @@ class StringDoubleMap : node::ObjectWrap {
 	    HandleScope scope;
 		StringDoubleMap* instance = node::ObjectWrap::Unwrap<StringDoubleMap>(args.This());
     	std::string key = *v8::String::Utf8Value(args[0]->ToString());
-		int value = args[1]->Int32Value();
+		double value = args[1]->Value();
 		instance->data[key] = value;
 		return scope.Close(Null());
     }
@@ -371,8 +394,8 @@ static void Init(Handle<Object> target) {
 		IntIntMap::constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
 		IntIntMap::constructor_template->SetClassName(v8::String::NewSymbol("IntIntMap"));
 
-		v8::Local<FunctionTemplate> lftIntLong = v8::FunctionTemplate::New(IntDoubleMap::New);
-		IntDoubleMap::constructor_template = v8::Persistent<FunctionTemplate>::New(lftIntLong);
+		v8::Local<FunctionTemplate> lftIntDouble = v8::FunctionTemplate::New(IntDoubleMap::New);
+		IntDoubleMap::constructor_template = v8::Persistent<FunctionTemplate>::New(lftIntDouble);
 		IntDoubleMap::constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
 		IntDoubleMap::constructor_template->SetClassName(v8::String::NewSymbol("IntDoubleMap"));
 
@@ -386,6 +409,11 @@ static void Init(Handle<Object> target) {
 		StringIntMap::constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
 		StringIntMap::constructor_template->SetClassName(v8::String::NewSymbol("StringIntMap"));
 
+		v8::Local<FunctionTemplate> lftStringDouble = v8::FunctionTemplate::New(StringDoubleMap::New);
+		StringDoubleMap::constructor_template = v8::Persistent<FunctionTemplate>::New(lftStringDouble);
+		StringDoubleMap::constructor_template->InstanceTemplate()->SetInternalFieldCount(1);
+		StringDoubleMap::constructor_template->SetClassName(v8::String::NewSymbol("StringDoubleMap"));
+
 		// Set property accessors
 		IntIntMap::constructor_template->InstanceTemplate()->SetAccessor(String::New("size"), IntIntMap::GetSize);
 		IntDoubleMap::constructor_template->InstanceTemplate()->SetAccessor(String::New("size"), IntDoubleMap::GetSize);
@@ -395,24 +423,34 @@ static void Init(Handle<Object> target) {
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "get", IntIntMap::get);
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "put", IntIntMap::put);
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "rm", IntIntMap::remove);
+		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "clear", IntIntMap::clear);
 
 		NODE_SET_PROTOTYPE_METHOD(IntDoubleMap::constructor_template, "get", IntDoubleMap::get);
 		NODE_SET_PROTOTYPE_METHOD(IntDoubleMap::constructor_template, "put", IntDoubleMap::put);
 		NODE_SET_PROTOTYPE_METHOD(IntDoubleMap::constructor_template, "rm", IntDoubleMap::remove);
+		NODE_SET_PROTOTYPE_METHOD(IntDoubleMap::constructor_template, "clear", IntDoubleMap::clear);
 
 		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "get", StringStringMap::get);
 		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "put", StringStringMap::put);
 		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "rm", StringStringMap::remove);
+		NODE_SET_PROTOTYPE_METHOD(StringStringMap::constructor_template, "clear", StringStringMap::clear);
 
 		NODE_SET_PROTOTYPE_METHOD(StringIntMap::constructor_template, "get", StringIntMap::get);
 		NODE_SET_PROTOTYPE_METHOD(StringIntMap::constructor_template, "put", StringIntMap::put);
 		NODE_SET_PROTOTYPE_METHOD(StringIntMap::constructor_template, "rm", StringIntMap::remove);
+		NODE_SET_PROTOTYPE_METHOD(StringIntMap::constructor_template, "clear", StringIntMap::clear);
+
+		NODE_SET_PROTOTYPE_METHOD(StringDoubleMap::constructor_template, "get", StringDoubleMap::get);
+		NODE_SET_PROTOTYPE_METHOD(StringDoubleMap::constructor_template, "put", StringDoubleMap::put);
+		NODE_SET_PROTOTYPE_METHOD(StringDoubleMap::constructor_template, "rm", StringDoubleMap::remove);
+		NODE_SET_PROTOTYPE_METHOD(StringDoubleMap::constructor_template, "clear", StringDoubleMap::clear);
 	}
 
 	target->Set(String::NewSymbol("IntIntMap"), IntIntMap::constructor_template->GetFunction());
 	target->Set(String::NewSymbol("IntDoubleMap"), IntDoubleMap::constructor_template->GetFunction());
 	target->Set(String::NewSymbol("StringStringMap"), StringStringMap::constructor_template->GetFunction());
 	target->Set(String::NewSymbol("StringIntMap"), StringIntMap::constructor_template->GetFunction());
+	target->Set(String::NewSymbol("StringDoubleMap"), StringDoubleMap::constructor_template->GetFunction());
 }
 
 // What follows is boilerplate code:
@@ -427,6 +465,7 @@ v8::Persistent<FunctionTemplate> IntIntMap::constructor_template;
 v8::Persistent<FunctionTemplate> IntDoubleMap::constructor_template;
 v8::Persistent<FunctionTemplate> StringStringMap::constructor_template;
 v8::Persistent<FunctionTemplate> StringIntMap::constructor_template;
+v8::Persistent<FunctionTemplate> StringDoubleMap::constructor_template;
 
 extern "C"
 void init(Handle<Object> target) {
