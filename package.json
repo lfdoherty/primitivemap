@@ -1,6 +1,6 @@
 {
 	"name": "primitivemap",
-	"version": "0.0.12",
+	"version": "0.0.13",
 	"description": "(string|int32)->(string|int32|double) map data structures created outside the JS heap using the Google sparsehash implementation.",
 	"main": "./primitivemap",
 	"author": "Liam Doherty",

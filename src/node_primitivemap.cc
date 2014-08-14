@@ -499,6 +499,7 @@ static void Init(Handle<Object> target) {
 		IntStringMap::constructor_template->InstanceTemplate()->SetAccessor(String::New("size"), IntStringMap::GetSize);
 		StringStringMap::constructor_template->InstanceTemplate()->SetAccessor(String::New("size"), StringStringMap::GetSize);
 		StringIntMap::constructor_template->InstanceTemplate()->SetAccessor(String::New("size"), StringIntMap::GetSize);
+		StringDoubleMap::constructor_template->InstanceTemplate()->SetAccessor(String::New("size"), StringDoubleMap::GetSize);
 
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "get", IntIntMap::get);
 		NODE_SET_PROTOTYPE_METHOD(IntIntMap::constructor_template, "put", IntIntMap::put);
